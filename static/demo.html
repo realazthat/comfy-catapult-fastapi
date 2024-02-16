@@ -1,0 +1,188 @@
+<html>
+  <head>
+    <title></title>
+  </head>
+  <body>
+    <h1>Demo</h1>
+    <div style="float: right; width: 512px; height: 512px">
+      <img
+        id="generated-image"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+        style="border: 1px dashed #000; width: 512px; height: 512px"
+      />
+      <fieldset>
+        <legend>Status</legend>
+        <!-- A little box that has a color that we will switch to indicate status -->
+        <div
+          id="status-led"
+          style="width: 20px; height: 20px; border: 1px solid #000"
+        ></div>
+        <!-- Make the pre only stretch to the parent div -->
+        <pre id="status-text" style="margin: 0; overflow: scroll; width: 100%; max-width: 100%; overflow-wrap: break-word; white-space: pre-wrap;">Idle</pre>
+      </fieldset>
+    </div>
+    <div style="float: left; width: 512px">
+      <fieldset>
+        <legend>Prompt</legend>
+        <textarea id="positive-prompt" style="width: 100%">
+A beautiful landscape overlooking a bustling fantasy city.</textarea
+        >
+      </fieldset>
+      <fieldset>
+        <legend>Negative Prompt</legend>
+        <textarea id="negative-prompt" style="width: 100%">NSFW</textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Model</legend>
+        <select id="model">
+          <option value="sd_xl_base_1.0.safetensors">
+            sd_xl_base_1.0
+          </option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>Lora</legend>
+        <select id="lora">
+          <option value="SDXLrender_v2.0.safetensors">SDXLrender_v2.0</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <legend>Hi-res Toggle</legend>
+        <input type="checkbox" id="hi-res" disabled />
+      </fieldset>
+      <fieldset>
+        <legend>CFG</legend>
+        <input type="number" id="cfg" min="0" max="20" step="0.01" value="7" />
+      </fieldset>
+      <fieldset>
+        <legend>Denoise</legend>
+        <input
+          type="number"
+          id="denoise"
+          min="0"
+          max="20"
+          step="0.01"
+          value="1"
+        />
+      </fieldset>
+      <fieldset>
+        <legend>Steps</legend>
+        <input type="number" id="steps" min="0" max="80" value="30" />
+      </fieldset>
+      <fieldset>
+        <legend>Seed</legend>
+        <input
+          type="number"
+          id="seed"
+          min="0"
+          max="100000000000"
+          step="1"
+          ,
+          value="0"
+        />
+      </fieldset>
+      <fieldset>
+        <legend>Resolution</legend>
+        <input
+          type="number"
+          id="width"
+          min="0"
+          max="2048"
+          step="1"
+          ,
+          value="512"
+        />
+        <input
+          type="number"
+          id="height"
+          min="0"
+          max="2048"
+          step="1"
+          ,
+          value="768"
+        />
+      </fieldset>
+      <button id="generate-button">Generate</button>
+    </div>
+    <script>
+      class GenerationError extends Error {
+        constructor({ response }) {
+          super();
+          if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, GenerationError);
+          }
+          this.response = response;
+        }
+      }
+      function GenerateJobID() {
+        let jobID = `simple-workflow-${new Date().toISOString()}`;
+        jobID = jobID.replace(/:/g, "-");
+        jobID = jobID.replace(/\./g, "-");
+        // make it lowercase
+        jobID = jobID.toLowerCase();
+        return jobID;
+      }
+      const buttonElement = document.getElementById("generate-button");
+      const imageElement = document.getElementById("generated-image");
+      const statusLed = document.getElementById("status-led");
+      const statusText = document.getElementById("status-text");
+
+      buttonElement.addEventListener("click", async () => {
+        try {
+          const postData = {
+            job_id: GenerateJobID(),
+            positive_prompt: document.getElementById("positive-prompt").value,
+            negative_prompt: document.getElementById("negative-prompt").value,
+            ckpt_name: document.getElementById("model").value,
+            lora: {
+              name: document.getElementById("lora").value,
+              strength: 1.0,
+            },
+            hires: document.getElementById("hi-res").checked,
+            seed: document.getElementById("seed").value,
+            cfg: document.getElementById("cfg").value,
+            denoise: document.getElementById("denoise").value,
+            steps: document.getElementById("steps").value,
+            width: document.getElementById("width").value,
+            height: document.getElementById("height").value,
+          };
+
+          statusLed.style.backgroundColor = "yellow";
+          statusText.innerText = "Generating...";
+
+          // now post to /simple-workflow
+          const response = await fetch("/simple-workflow", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postData),
+          });
+          if (!response.ok) {
+            // Set status-led
+            statusLed.style.backgroundColor = "red";
+            statusText.innerText = "Getting error...";
+
+            const errorText = await response.text();
+            throw new GenerationError({ response: errorText });
+          }
+          const responseJson = await response.json();
+
+          const b64 = responseJson["output_b64"];
+          imageElement.src = `data:image/png;base64,${b64}`;
+
+          statusLed.style.backgroundColor = "green";
+          statusText.innerText = "Generated!";
+        } catch (error) {
+          console.error("Error:", error);
+          statusLed.style.backgroundColor = "red";
+          if (error instanceof GenerationError) {
+            statusText.innerText = error.response;
+            return;
+          }
+          statusText.innerText = `Error: ${error.message}, type: ${error.constructor.name}`;
+        }
+      });
+    </script>
+  </body>
+</html>
