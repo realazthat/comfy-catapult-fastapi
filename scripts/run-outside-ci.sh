@@ -5,8 +5,8 @@ SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 source "${SCRIPT_DIR}/utilities/common.sh"
 
 ENV_VARS_FILE=${ENV_VARS_FILE:-""}
-PROJECT_RO_PATH=/ci-project-ro/
-PROJECT_CLONE_PATH=/ci-project-export/
+PROJECT_RO_PATH=/ci-project-ro
+PROJECT_CLONE_PATH=/home/user/ci-project-export
 IMAGE_PREFIX=${IMAGE_PREFIX:-""}
 INSTANCE=${INSTANCE:-""}
 
@@ -40,7 +40,7 @@ fi
 PYTHON_VERSION=$(cat .python-version)
 IMAGE=${IMAGE_PREFIX}-${PYTHON_VERSION}
 
-docker build -t "${IMAGE}" \
+docker --debug build -t "${IMAGE}" \
   --build-arg PYTHON_VERSION=${PYTHON_VERSION} \
   -f "${PROJ_PATH}/scripts/ci/docker/Dockerfile" \
   "${PROJ_PATH}/"

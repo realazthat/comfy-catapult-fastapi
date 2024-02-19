@@ -29,4 +29,3 @@ cd "${CLEAN_CLONE_PATH}"
 docker build \
   --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
   -t ${IMAGE_NAME}:${IMAGE_TAG} .
-  

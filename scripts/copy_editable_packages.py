@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+#
+# The Comfy Catapult project requires contributions made to this file be licensed
+# under the MIT license or a compatible open source license. See LICENSE.md for
+# the license text.
+
 """Copy editable packages into a specified directory.
 """
 import argparse
@@ -13,45 +20,45 @@ from typing import List
 parser = argparse.ArgumentParser(description=__doc__)
 
 parser.add_argument(
-    "--package_infos",
+    '--package_infos',
     type=str,
-    help="The package infos to copy (json). See extract_editable_packages.py.")
-parser.add_argument("--output_dir",
+    help='The package infos to copy (json). See extract_editable_packages.py.')
+parser.add_argument('--output_dir',
                     type=Path,
-                    help="The directory to copy the packages to.")
+                    help='The directory to copy the packages to.')
 args = parser.parse_args()
 
 
 def is_mounted(path: Path) -> bool:
   path = path.resolve()
   p = subprocess.run(
-      ["findmnt", "--noheadings", "--output", "SOURCE",
+      ['findmnt', '--noheadings', '--output', 'SOURCE',
        str(path)],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   if p.returncode != 0:
-    raise Exception(f"findmnt failed with return code {p.returncode}")
+    raise Exception(f'findmnt failed with return code {p.returncode}')
 
-  return p.stdout.strip() != b""
+  return p.stdout.strip() != b''
 
 
 def unmount(path: Path) -> None:
   path = path.resolve()
-  p = subprocess.run(["fusermount", "-u", str(path)],
+  p = subprocess.run(['fusermount', '-u', str(path)],
                      stdout=sys.stderr,
                      stderr=sys.stderr)
   if p.returncode != 0:
-    raise Exception(f"fusermount failed with return code {p.returncode}")
+    raise Exception(f'fusermount failed with return code {p.returncode}')
 
 
 def mount(source: Path, target: Path) -> None:
   p = subprocess.run(
-      ["bindfs", "--perms=a-w",
+      ['bindfs', '--perms=a-w',
        str(source), str(target)],
       stdout=sys.stderr,
       stderr=sys.stderr)
   if p.returncode != 0:
-    raise Exception(f"bindfs failed with return code {p.returncode}")
+    raise Exception(f'bindfs failed with return code {p.returncode}')
 
 
 def parse_gitignore(gitignore_path) -> List[str]:
@@ -97,7 +104,7 @@ for package_info in package_infos:
   package_path = Path(package_location)
   package_path = package_path.resolve()
 
-  output_package_path = args.output_dir / f"{package_name}"
+  output_package_path = args.output_dir / f'{package_name}'
   output_package_path = output_package_path.resolve()
 
   ##############################################################################
@@ -113,7 +120,7 @@ for package_info in package_infos:
   if output_package_path.exists():
     shutil.rmtree(output_package_path)
 
-  gitignore_path = package_path / ".gitignore"
+  gitignore_path = package_path / '.gitignore'
   ignore_patterns = ['.*']
   if gitignore_path.exists():
     ignore_patterns += parse_gitignore(gitignore_path)

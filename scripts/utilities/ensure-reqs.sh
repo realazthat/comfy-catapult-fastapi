@@ -14,13 +14,13 @@ fi
 
 # Better way to Check if pip-sync is installed
 
-if which pip-sync; then
+if command -v pip-sync; then
   echo "pip-sync is installed"
 else
   echo "pip-sync is not installed"
   pip install pip-tools
 fi
 
-pip-sync "$REQS"
-# pip install -r "$REQS"
-# pip install --no-deps --ignore-installed -r "$REQS"
+# pip-sync "${REQS}"
+pip install -r "${REQS}"
+# pip install --no-deps --ignore-installed -r "${REQS}"

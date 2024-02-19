@@ -16,6 +16,9 @@ if [[ -z "${PROJECT_CLONE_PATH}" ]]; then
   ${EXIT} 1
 fi
 
+# If PROJECT_CLONE_PATH has a trailing slash, remove it.
+PROJECT_CLONE_PATH=$(echo "${PROJECT_CLONE_PATH}" | sed 's:/*$::')
+
 if [[ -z "${ENV_VARS_FILE}" ]]; then
   echo -e "${RED}ENV_VARS_FILE is not set${NC}"
   # trunk-ignore(shellcheck/SC2128)
@@ -41,9 +44,10 @@ source "${ENV_VARS_FILE}"
 git config --global --add safe.directory "${PROJ_PATH}"
 cd "${PROJ_PATH}"
 mkdir -p "${PROJECT_CLONE_PATH}"
-git checkout-index --all --prefix="${PROJECT_CLONE_PATH}"
+git checkout-index --all --prefix="${PROJECT_CLONE_PATH}/"
 ################################################################################
 cd "${PROJECT_CLONE_PATH}"
+ls -la /home/user/ci-project-export
 
 VENV_PATH=.venv source "${PROJECT_CLONE_PATH}/scripts/utilities/ensure-venv.sh"
 
@@ -51,15 +55,6 @@ cat "${PROJECT_CLONE_PATH}/.python-version"
 cat "${PROJECT_CLONE_PATH}/requirements.txt"
 pip install -r requirements.txt
 
-bash "${PROJECT_CLONE_PATH}/scripts/run-all-tests.sh"
-bash "${PROJECT_CLONE_PATH}/scripts/run-all-examples-inside-repo.sh"
-
-# Make a new temporary path, to test installing the repo as a package.
-TMP_PATH=$(mktemp -d)
-cd "${TMP_PATH}"
-cp "${PROJECT_CLONE_PATH}/.python-version" .
-ls -la .
-VENV_PATH=.venv source "${PROJECT_CLONE_PATH}/scripts/utilities/ensure-venv.sh"
-pip install -e "${PROJECT_CLONE_PATH}"
-
-bash "${PROJECT_CLONE_PATH}/scripts/run-all-examples-as-modules.sh"
+bash "${PROJECT_CLONE_PATH}/scripts/run-all-test-modules.sh"
+bash "${PROJECT_CLONE_PATH}/scripts/run-smoke-test.sh"
+################################################################################

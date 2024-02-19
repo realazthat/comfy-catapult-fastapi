@@ -1,13 +1,20 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+#
+# The Comfy Catapult project requires contributions made to this file be licensed
+# under the MIT license or a compatible open source license. See LICENSE.md for
+# the license text.
+
 import asyncio
 import json
 import pathlib
 import sys
 
 import anyio
+import hypercorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import hypercorn
 from hypercorn.asyncio import serve
 from pydantic import ValidationError
 from rich.console import Console
@@ -29,7 +36,7 @@ async def initialize_app(settings: Settings):
   app.state.workflow_templates = WorkflowTemplates(simple_workflow=json.loads(
       pathlib.Path(settings.SIMPLE_WORKFLOW_JSON_API_PATH).read_text()))
 
-  app.mount("/static", StaticFiles(directory="static"), name="static")
+  app.mount('/static', StaticFiles(directory='static'), name='static')
 
   # Add the routes to the app
   app.include_router(api_router)
@@ -39,8 +46,8 @@ async def initialize_app(settings: Settings):
       CORSMiddleware,
       allow_origins=settings.ALLOWED_HOSTS,
       allow_credentials=True,
-      allow_methods=["*"],
-      allow_headers=["*"],
+      allow_methods=['*'],
+      allow_headers=['*'],
   )
   # Get hostname -I from system
   # hostname = (await anyio.run_process("hostname -I")).stdout.strip().decode()
@@ -55,7 +62,7 @@ async def run(*, app: FastAPI, settings: Settings):
 
   bind = []
   # for hostname in hostnames:
-  bind += [f"{settings.HOSTNAME}:{settings.PORT}"]
+  bind += [f'{settings.HOSTNAME}:{settings.PORT}']
 
   hconfig.bind = bind
   hconfig.loglevel = 'debug' if settings.DEBUG else 'warning'
@@ -67,10 +74,10 @@ console = Console(file=sys.stderr)
 try:
   settings = Settings()
 except ValidationError as e:
-  console.print(e, style="bold red")
+  console.print(e, style='bold red')
   console.print(
       'Note, this usually means you need to specify the missing variable via an environment variable.',
-      style="bold yellow")
+      style='bold yellow')
   sys.exit(1)
 
 app = asyncio.run(initialize_app(settings))

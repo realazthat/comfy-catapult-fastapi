@@ -35,9 +35,15 @@ if [[ -n "${EXISTING_PID}" ]]; then
   wait ${EXISTING_PID} || true
 fi
 
-# hypercorn src.main:app --bind $(hostname -I | cut -d' ' -f1):$PORT --reload
-export HOSTNAME=$(hostname -I | cut -d' ' -f1)
 
+# if hostname -I > /dev/null 2>&1; then
+#   # Get hostname for ubuntu
+#   export HOSTNAME=$(hostname -I | cut -d' ' -f1)
+# else
+#   # Get hostname for alpine
+#   export HOSTNAME=$(ip addr show eth0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
+# fi
+export HOSTNAME="0.0.0.0"
 
 python -m src.main > >(tee /dev/stderr) 2>&1 &
 FASTAPI_PID=$!

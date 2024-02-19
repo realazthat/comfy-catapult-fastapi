@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
+#
+# The Comfy Catapult project requires contributions made to this file be licensed
+# under the MIT license or a compatible open source license. See LICENSE.md for
+# the license text.
+
 # FASTAPI routes
 #
 # In the routes.py file, we define the routes for the FASTAPI application.
@@ -12,37 +19,33 @@ import anyio
 from comfy_catapult.api_client import ComfyAPIClient
 from comfy_catapult.catapult import ComfyCatapult
 from comfy_catapult.remote_file_api_comfy import ComfySchemeRemoteFileAPI
-from fastapi import APIRouter
-from fastapi import HTTPException
-from fastapi import Request
+from fastapi import APIRouter, HTTPException, Request
 from slugify import slugify
 
-from .api_schema import SimpleWorkflowRequest
-from .api_schema import SimpleWorkflowResponse
+from .api_schema import SimpleWorkflowRequest, SimpleWorkflowResponse
 from .settings import Settings
 from .workflow_templates import WorkflowTemplates
-from .workflows.simple_worfklow import ExecuteSimpleWorkflow
-from .workflows.simple_worfklow import SimpleWorkflowInfo
-
+from .workflows.simple_worfklow import (ExecuteSimpleWorkflow,
+                                        SimpleWorkflowInfo)
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get('/')
 async def read_root():
-  return {"Hello": "World"}
+  return {'Hello': 'World'}
 
 
-@router.post("/simple-workflow")
-async def post_simple_workflow(request: Request, inputs: SimpleWorkflowRequest
-                               ) -> SimpleWorkflowResponse:
+@router.post('/simple-workflow')
+async def post_simple_workflow(
+    request: Request, inputs: SimpleWorkflowRequest) -> SimpleWorkflowResponse:
   settings: Settings = request.app.state.settings
 
   if slugify(inputs.job_id) != inputs.job_id:
     raise HTTPException(
         status_code=400,
         detail=
-        f"Invalid job_id {repr(inputs.job_id)} Must be slugified. Got {slugify(inputs.job_id)}."
+        f'Invalid job_id {repr(inputs.job_id)} Must be slugified. Got {slugify(inputs.job_id)}.'
     )
   # TODO: For security purposes, we should make this name a bit more
   # complicated, so that collisions are impossible.
@@ -51,7 +54,7 @@ async def post_simple_workflow(request: Request, inputs: SimpleWorkflowRequest
   if inputs.steps > settings.MAX_STEPS:
     raise HTTPException(
         status_code=400,
-        detail=f"Too many steps. {inputs.steps} > {settings.MAX_STEPS}")
+        detail=f'Too many steps. {inputs.steps} > {settings.MAX_STEPS}')
 
   async with ComfyAPIClient(
       comfy_api_url=settings.COMFY_API_URL) as comfy_client:
@@ -82,7 +85,7 @@ async def post_simple_workflow(request: Request, inputs: SimpleWorkflowRequest
             output_path=anyio.Path(tmpdir) / 'output.png')
         await ExecuteSimpleWorkflow(job_info=job_info)
 
-        async with aiofiles.open(job_info.output_path, "rb") as f:
+        async with aiofiles.open(job_info.output_path, 'rb') as f:
           image_bytes = await f.read()
-          image_b64 = b64encode(image_bytes).decode("utf-8")
+          image_b64 = b64encode(image_bytes).decode('utf-8')
           return SimpleWorkflowResponse(job_id=job_id, output_b64=image_b64)

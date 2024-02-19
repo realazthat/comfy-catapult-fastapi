@@ -24,7 +24,3 @@ for PACKAGE_DIRECTORY in $(ls -d editable-packages/*); do
   PACKAGE_DIRECTORY=$(realpath $PACKAGE_DIRECTORY)
   pip install -e $PACKAGE_DIRECTORY
 done
-
-
-
-

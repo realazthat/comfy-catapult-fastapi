@@ -37,5 +37,3 @@ ENV SERVING_PORT=${SERVING_PORT}
 EXPOSE ${SERVING_PORT}
 # Command to run when starting the container
 CMD /bin/bash -c "SERVING_PORT=${SERVING_PORT} scripts/serve-inside-repo.sh"
-
-

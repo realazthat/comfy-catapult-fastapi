@@ -25,5 +25,3 @@ EDITABLE_PKGS=$(python "${SCRIPTS_PATH}/extract_editable_packages.py")
 time python ${SCRIPTS_PATH}/copy_editable_packages.py \
   --package_infos "${EDITABLE_PKGS}" \
   --output_dir "${EDITABLE_PKGS_DIRECTORY}"
-
-

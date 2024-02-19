@@ -13,4 +13,3 @@ IMAGE_TAG=2024-02-01
 docker tag $IMAGE_NAME:$IMAGE_TAG realazthat/$IMAGE_NAME:$IMAGE_TAG
 
 docker push realazthat/$IMAGE_NAME:$IMAGE_TAG
-

@@ -26,7 +26,7 @@ export PYTHONPATH=${PYTHONPATH:-}
 export PYTHONPATH=${PYTHONPATH}:${PWD}
 export PYTHONPATH=${PYTHONPATH}:${PWD}/src
 
-source "${SCRIPTS_PATH}/install-inside-repo.sh"
+source "${SCRIPTS_PATH}/install.sh"
 
 # if hostname -I > /dev/null 2>&1; then
 #   # Get hostname for ubuntu
@@ -36,8 +36,7 @@ source "${SCRIPTS_PATH}/install-inside-repo.sh"
 #   HOSTNAME=$(ip addr | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
 # fi
 
-HOSTNAME="0.0.0.0"
+export HOSTNAME="0.0.0.0"
+export PORT=$SERVING_PORT
 
-hypercorn src.main:app --bind ${HOSTNAME}:${SERVING_PORT} --reload
-
-
+python src.main
