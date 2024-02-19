@@ -13,27 +13,30 @@ ENV SERVING_PORT="${DEFAULT_SERVING_PORT}"
 
 ################################################################################
 USER root
-# Copy the entire project to the container.
-COPY . "/project"
+
+COPY scripts/ci/docker/install-docker-prereqs-inside.sh "/install-docker-prereqs-inside.sh"
+
 # Give execution rights on the script.
 # Run the script to install the prerequisites.
-# Change the owner of the project to the user.
-RUN apk add --no-cache bash \
+RUN apk add --no-cache bash=5.2.21-r0 \
     && addgroup -S "${TARGET_GROUP}" \
     && adduser -S "${TARGET_USER}" -G "${TARGET_GROUP}" -s /bin/bash \
     && chown -R "${TARGET_USER}:${TARGET_GROUP}" "/home/${TARGET_USER}/" \
-    && cp -r "/project" "/home/${TARGET_USER}/" \
-    && chown -R "${TARGET_USER}:${TARGET_GROUP}" "/home/${TARGET_USER}/project" \
-    && cd "/home/${TARGET_USER}/project" \
-    && chmod a+x "scripts/ci/docker/install-docker-prereqs-inside.sh" \
-    && bash "scripts/ci/docker/install-docker-prereqs-inside.sh" \
-    && su - "${TARGET_USER}" -s /bin/sh -c "cd /home/${TARGET_USER}/project && /bin/bash scripts/install-inside-repo.sh"
+    && chmod a+x "/install-docker-prereqs-inside.sh" \
+    && bash "/install-docker-prereqs-inside.sh"
 
+################################################################################
+# Copy the entire project to the container.
+COPY . "/home/${TARGET_USER}/project"
+# Change owner and permissions of project
+USER root
+RUN chown -R "${TARGET_USER}:${TARGET_GROUP}" "/home/${TARGET_USER}/project"
 ################################################################################
 USER "${TARGET_USER}"
 WORKDIR "/home/${TARGET_USER}/project"
+RUN bash scripts/install.sh
 ################################################################################
 ENV SERVING_PORT=${SERVING_PORT}
 EXPOSE ${SERVING_PORT}
 # Command to run when starting the container
-CMD /bin/bash -c "SERVING_PORT=${SERVING_PORT} scripts/serve-inside-repo.sh"
+CMD /bin/bash -c "SERVING_PORT=${SERVING_PORT} scripts/serve.sh"

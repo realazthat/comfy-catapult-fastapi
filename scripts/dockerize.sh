@@ -7,13 +7,21 @@ SCRIPT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 source "${SCRIPT_DIR}/utilities/common.sh"
 
 IMAGE_NAME=comfy-catapult-fastapi-demo
-IMAGE_TAG=2024-02-01
+IMAGE_TAG=${IMAGE_TAG:-""}
+
+if [[ -z "${IMAGE_TAG}" ]]; then
+  echo -e "${RED}IMAGE_TAG is not set${NC}"
+  # trunk-ignore(shellcheck/SC2128)
+  # trunk-ignore(shellcheck/SC2209)
+  [[ $0 == "${BASH_SOURCE}" ]] && EXIT=exit || EXIT=return
+  ${EXIT} 1
+fi
 
 CLEAN_CLONE_PATH="${PWD}/.dockertmp"
 rm -rf "${CLEAN_CLONE_PATH}"
 mkdir -p "${CLEAN_CLONE_PATH}"
 
-export PYTHON_VERSION=$(cat "${PROJ_PATH}/.python-version")
+PYTHON_VERSION=$(cat "${PROJ_PATH}/.python-version")
 
 ################################################################################
 git checkout-index --all --prefix="${CLEAN_CLONE_PATH}/"
@@ -22,10 +30,10 @@ ls -la "${CLEAN_CLONE_PATH}"
 EDITABLE_PKGS_DIRECTORY="${CLEAN_CLONE_PATH}/editable-packages"
 mkdir -p "${CLEAN_CLONE_PATH}/editable-packages"
 
-EDITABLE_PKGS_DIRECTORY="$EDITABLE_PKGS_DIRECTORY" \
+EDITABLE_PKGS_DIRECTORY="${EDITABLE_PKGS_DIRECTORY}" \
   bash "${SCRIPT_DIR}/extract_and_copy_editable_packages.sh"
 
 cd "${CLEAN_CLONE_PATH}"
 docker build \
   --build-arg PYTHON_VERSION="${PYTHON_VERSION}" \
-  -t ${IMAGE_NAME}:${IMAGE_TAG} .
+  -t "${IMAGE_NAME}:${IMAGE_TAG}" .

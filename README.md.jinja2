@@ -19,12 +19,12 @@ ComfyUI API Endpoint <|   <=  Comfy Catapult <=>  FastAPI server <| <=      Publ
 
 ```bash
 
-docker run -p 59090:80 realazthat/comfy-catapult-fastapi-demo:latest
+docker run --rm -it -p 59090:80 -e COMFY_API_URL=$COMFY_API_URL realazthat/comfy-catapult-fastapi-demo:latest
 
 # Now navigate to http://localhost:59090/docs, and you should see the FastAPI
 # documentation for the exposed workflow.
 
-# Navigate to http://localhost:59090/static/demo an example website that might
+# Navigate to http://localhost:59090/static/demo.html an example website that might
 # use this API.
 
 
@@ -40,7 +40,7 @@ python -m src.main
 # Navigate to http://localhost:59091/docs, and you should see the FastAPI
 # documentation for the exposed workflow.
 
-# Navigate to http://localhost:59091/static/demo an example website that might
+# Navigate to http://localhost:59091/static/demo.html an example website that might
 # use this API.
 ```
 
