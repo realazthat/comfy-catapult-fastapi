@@ -3,12 +3,13 @@ set -e -x -v -u -o pipefail
 
 UTILITIES_PATH="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
-SCRIPTS_PATH=$(dirname $UTILITIES_PATH)
-export PROJ_PATH=$(dirname $SCRIPTS_PATH)
+SCRIPTS_PATH=$(dirname "${UTILITIES_PATH}")
+PROJ_PATH=$(dirname "${SCRIPTS_PATH}")
+export PROJ_PATH=${PROJ_PATH}
 
-export THIS_SCRIPT_DIRECTORY=$(dirname $0)
-UTILITIES_DIRECTORY=$(dirname $THIS_SCRIPT_DIRECTORY)
+# THIS_SCRIPT_DIRECTORY=$(dirname "$0")
+# UTILITIES_DIRECTORY=$(dirname "${THIS_SCRIPT_DIRECTORY}")
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export NC='\033[0m'

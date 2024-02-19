@@ -37,6 +37,6 @@ source "${SCRIPTS_PATH}/install.sh"
 # fi
 
 export HOSTNAME="0.0.0.0"
-export PORT=$SERVING_PORT
+export PORT=${SERVING_PORT}
 
-python src.main
+python -m src.main
